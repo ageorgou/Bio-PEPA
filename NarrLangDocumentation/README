@@ -9,11 +9,12 @@ This folder contains some information on using the Narrative Language.
   provide the interface for the NL -> BioPEPA translation from within the BioPEPA plugin.
   Our intention is for this to be included in the next major release of the plugin.
 
-- The full code for the translation is included in narrlang.jar. This includes
-  the Xtext grammar file, the classes generated automatically by Xtext and the classes
-  that implement the translation. We strongly suggest the use of the plugin instead
-  of the "standalone" version, as it allows for easier use and better display of errors.
-  If needed, however, the main way to call the translator is by running MainClass:
+- The full code for the translation can be found in narrlang.jar, which is included
+  in the updated uk.ac.ed.inf.biopepa.ui. This includesthe Xtext grammar file,
+  the classes generated automatically by Xtext and the classes that implement the
+  translation. We strongly suggest the use of the plugin insteadof the "standalone"
+  version, as it allows for easier use and better display of errors.If needed,
+  however, the main way to call the translator is by running MainClass:
   
   java MainClass <input-filename> <input-location> <output-location>
   
@@ -21,8 +22,9 @@ This folder contains some information on using the Narrative Language.
   project's folder, and Windows users might need to use "//" as separator
   between folders)
   
-  This will create a BioPEPA file in output-location, the name of which is
-  the input file's name followed by "_out.biopepa".
+  This will create a BioPEPA file in output-location (which can be the same as
+  input-location), the name of which is the input file's name followed by
+  "_out.biopepa".
   
   Using the wizard in the plugin avoids these issues. 
   
