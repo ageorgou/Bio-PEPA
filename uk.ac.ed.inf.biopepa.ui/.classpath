@@ -14,5 +14,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/sbsidataformattJava/lib/commons-io-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jlibsedml/jlibsedml.jar"/>
 	<classpathentry kind="lib" path="lib/james-biopepaservice.jar"/>
+	<classpathentry kind="lib" path="/afs/inf.ed.ac.uk/user/a/ageorgou/workspace/narrlang.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
