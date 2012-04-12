@@ -28,6 +28,12 @@
              </groupMarker>
           </menu>
           <action
+                class="uk.ac.ed.inf.biopepa.ui.actions.NLImportAction"
+                id="uk.ac.ed.inf.biopepa.ui.nlimport"
+                label="Import Narrative Language..."
+                menubarPath="uk.ac.ed.inf.biopepa.ui.BioPEPAMenu/uk.ac.ed.inf.biopepa.ui.groupMarker1">
+          </action>
+          <action
                 class="uk.ac.ed.inf.biopepa.ui.actions.ExportAction"
                 id="uk.ac.ed.inf.biopepa.ui.export"
                 label="Export..."
