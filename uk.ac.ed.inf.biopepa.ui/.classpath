@@ -6,6 +6,8 @@
 	<classpathentry exported="true" kind="lib" path="lib/jlibsedml/lib/jdom_1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jlibsedml/lib/jmathml.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jlibsedml/lib/xom-1.2.1.jar"/>
+	<classpathentry kind="lib" path="src/narrlang.jar"/>
+	<classpathentry kind="lib" path="narrlang.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
@@ -14,6 +16,5 @@
 	<classpathentry exported="true" kind="lib" path="lib/sbsidataformattJava/lib/commons-io-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jlibsedml/jlibsedml.jar"/>
 	<classpathentry kind="lib" path="lib/james-biopepaservice.jar"/>
-	<classpathentry kind="lib" path="/afs/inf.ed.ac.uk/user/a/ageorgou/workspace/narrlang.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

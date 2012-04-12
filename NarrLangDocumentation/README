@@ -1,0 +1,30 @@
+This folder contains some information on using the Narrative Language.
+
+- The formal syntax can be found in the grammar.pdf.
+- The files enzymatic.nl and mapk.nl are two examples of small models. The former has
+  some explanatory comments on the syntax.
+  
+- The code in this repository differs from the official version by the inclusion of the
+  uk.ac.ed.inf.biopepa.ui.wizards.importing package and an updated plugin.xml file. These
+  provide the interface for the NL -> BioPEPA translation from within the BioPEPA plugin.
+  Our intention is for this to be included in the next major release of the plugin.
+
+- The full code for the translation is included in narrlang.jar. This includes
+  the Xtext grammar file, the classes generated automatically by Xtext and the classes
+  that implement the translation. We strongly suggest the use of the plugin instead
+  of the "standalone" version, as it allows for easier use and better display of errors.
+  If needed, however, the main way to call the translator is by running MainClass:
+  
+  java MainClass <input-filename> <input-location> <output-location>
+  
+  (Note, however, Eclipse might not be happy with files located outside the
+  project's folder, and Windows users might need to use "//" as separator
+  between folders)
+  
+  This will create a BioPEPA file in output-location, the name of which is
+  the input file's name followed by "_out.biopepa".
+  
+  Using the wizard in the plugin avoids these issues. 
+  
+ For questions or any issues, please contact Anastasis Georgoulas
+ (Anastasis.Georgoulas@ed.ac.uk)
