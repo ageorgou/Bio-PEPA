@@ -29,4 +29,5 @@ Bundle-ClassPath: .,
  lib/jlibsedml/lib/jmathml.jar,
  lib/jlibsedml/lib/xom-1.2.1.jar,
  lib/james-core-08.jar,
- lib/commons-cli-1.1.jar
+ lib/commons-cli-1.1.jar,
+ lib/narrlang.jar
