@@ -23,6 +23,8 @@ import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
 
+import uk.ac.ed.inf.biopepa.ui.interfaces.ITextProvider;
+
 
 /**
  * 
@@ -35,7 +37,7 @@ import org.eclipse.swt.SWT;
  * elimination. 
  */
 
-public class BioPEPAInvariantsView extends ViewPart {
+public class BioPEPAInvariantsView extends ViewPart implements ITextProvider {
 
 	/**
 	 * The ID of the view as specified by the extension.

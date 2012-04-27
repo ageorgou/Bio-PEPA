@@ -40,9 +40,10 @@ import uk.ac.ed.inf.biopepa.core.sba.SimpleTree;
 import uk.ac.ed.inf.biopepa.ui.BioPEPAEvent;
 import uk.ac.ed.inf.biopepa.ui.interfaces.BioPEPAListener;
 import uk.ac.ed.inf.biopepa.ui.interfaces.BioPEPAModel;
+import uk.ac.ed.inf.biopepa.ui.interfaces.ITextProvider;
 
 public class BioPEPAOutline extends ContentOutlinePage implements
-		BioPEPAListener {
+		BioPEPAListener, ITextProvider {
 	
 	Action copyAction;
 	Action saveAction;
