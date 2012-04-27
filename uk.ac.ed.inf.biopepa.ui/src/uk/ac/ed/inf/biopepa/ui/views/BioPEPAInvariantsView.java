@@ -1,9 +1,21 @@
 package uk.ac.ed.inf.biopepa.ui.views;
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.part.*;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.*;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -31,7 +43,8 @@ public class BioPEPAInvariantsView extends ViewPart {
 	public static final String ID = "uk.ac.ed.inf.biopepa.ui.views.BioPEPAInvariantsView";
 
 	private TableViewer viewer;
-	// private Action action1;
+	private Action saveAction;
+	private Action copyAction;
 	// private Action action2;
 	// private Action doubleClickAction;
 
@@ -90,7 +103,7 @@ public class BioPEPAInvariantsView extends ViewPart {
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setSorter(new NameSorter());
 		viewer.setInput(getViewSite());
-		// makeActions();
+		makeActions();
 		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
@@ -124,6 +137,9 @@ public class BioPEPAInvariantsView extends ViewPart {
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
+		manager.add(copyAction);
+		manager.add(saveAction);
+		
 		/*
 		manager.add(action1);
 		manager.add(action2);
@@ -134,12 +150,28 @@ public class BioPEPAInvariantsView extends ViewPart {
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(copyAction);
+		manager.add(saveAction);
 		/*
 		manager.add(action1);
 		manager.add(action2);
 		*/
 	}
 
+	private void makeActions() {
+		copyAction = new CopyInvariantsAction();
+		copyAction.setText("Copy all");
+		copyAction.setToolTipText("Copy invariants to clipboard");
+		copyAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+			getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+		
+		saveAction = new SaveInvariantsAction();
+		saveAction.setText("Save...");
+		saveAction.setToolTipText("Save invariants to file");
+		saveAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+			getImageDescriptor(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+	}
+	
 	/*
 	private void makeActions() {
 		action1 = new Action() {
@@ -207,5 +239,74 @@ public class BioPEPAInvariantsView extends ViewPart {
 	
 	public void addInvariant(String invariant){
 		viewer.add(invariant);
+	}
+	
+	private String[] getInvariants() {
+		TableItem[] items = viewer.getTable().getItems();
+		String[] invariants = new String[items.length];
+		for (int i = 0; i < items.length; i++)
+			invariants[i] = items[i].getText();
+		
+		return invariants;
+		
+	}
+	
+	public String asText() {
+		String text = "";
+		String[] invs = getInvariants();
+		for (int i = 0; i < invs.length; i++)
+			text += invs[i] + "\n";
+		return text;
+	}
+	
+	private class CopyInvariantsAction extends Action {
+		
+		public void run() {			
+			TextTransfer transfer = TextTransfer.getInstance();
+			Clipboard cb = new Clipboard(Display.getCurrent());
+			cb.setContents(new String[] {asText()}, new Transfer[] {transfer});
+			cb.dispose();
+			
+		}
+				
+	}
+	
+	private class SaveInvariantsAction extends Action {
+		
+		public void run() {
+			
+			if (getInvariants().length == 0)
+				showMessage("You must first infer the invariants.");
+			
+			else try {
+				//get the location of the file in the editor
+				IResource modelFile = (IResource) PlatformUI.getWorkbench().getActiveWorkbenchWindow(). 
+					getActivePage().getActiveEditor().getEditorInput().getAdapter(IResource.class);
+				String modelPath = modelFile.getLocation().removeLastSegments(1).toString();
+								
+				FileDialog fd =
+					new FileDialog(Display.getDefault().getActiveShell(),SWT.SAVE) ;
+				fd.setOverwrite(true);
+				fd.setFilterPath(modelPath);
+				String targetFile = fd.open();
+				
+				//write the invariants in the target file
+				if (targetFile != null) {
+					Writer w = new BufferedWriter(new FileWriter(new File(targetFile)));
+//					for (String inv : invariants) {
+//						w.write(inv + "\n");
+//					}
+					w.write(asText());
+					w.close();
+				}
+				
+				
+			}
+			catch (Exception e){
+				e.printStackTrace();
+				showMessage("Error while saving invariants.");
+			}
+		}
+		
 	}
 }
