@@ -2,6 +2,7 @@ package uk.ac.ed.inf.biopepa.ui.views;
 
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.part.*;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.graphics.Image;
@@ -10,6 +11,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
+
+import uk.ac.ed.inf.biopepa.ui.actions.CopyAction;
+import uk.ac.ed.inf.biopepa.ui.actions.SaveAction;
+import uk.ac.ed.inf.biopepa.ui.interfaces.ITextProvider;
 
 
 /**
@@ -23,7 +28,7 @@ import org.eclipse.swt.SWT;
  * elimination. 
  */
 
-public class BioPEPAInvariantsView extends ViewPart {
+public class BioPEPAInvariantsView extends ViewPart implements ITextProvider {
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -31,7 +36,8 @@ public class BioPEPAInvariantsView extends ViewPart {
 	public static final String ID = "uk.ac.ed.inf.biopepa.ui.views.BioPEPAInvariantsView";
 
 	private TableViewer viewer;
-	// private Action action1;
+	private Action saveAction;
+	private Action copyAction;
 	// private Action action2;
 	// private Action doubleClickAction;
 
@@ -90,7 +96,7 @@ public class BioPEPAInvariantsView extends ViewPart {
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setSorter(new NameSorter());
 		viewer.setInput(getViewSite());
-		// makeActions();
+		makeActions();
 		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
@@ -124,6 +130,9 @@ public class BioPEPAInvariantsView extends ViewPart {
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
+		manager.add(copyAction);
+		manager.add(saveAction);
+		
 		/*
 		manager.add(action1);
 		manager.add(action2);
@@ -134,12 +143,28 @@ public class BioPEPAInvariantsView extends ViewPart {
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(copyAction);
+		manager.add(saveAction);
 		/*
 		manager.add(action1);
 		manager.add(action2);
 		*/
 	}
 
+	private void makeActions() {
+		copyAction = new CopyAction(this);
+		copyAction.setText("Copy all");
+		copyAction.setToolTipText("Copy invariants to clipboard");
+		copyAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+			getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+		
+		saveAction = new SaveAction(this);
+		saveAction.setText("Save...");
+		saveAction.setToolTipText("Save invariants to file");
+		saveAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+			getImageDescriptor(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+	}
+	
 	/*
 	private void makeActions() {
 		action1 = new Action() {
@@ -178,6 +203,7 @@ public class BioPEPAInvariantsView extends ViewPart {
 			}
 		});
 	}
+	
 	private void showMessage(String message) {
 		MessageDialog.openInformation(
 			viewer.getControl().getShell(),
@@ -208,4 +234,29 @@ public class BioPEPAInvariantsView extends ViewPart {
 	public void addInvariant(String invariant){
 		viewer.add(invariant);
 	}
+	
+	/**
+	 * Returns the inferred invariants (contents of the viewer). If the
+	 * invariants haven't been inferred yet, an empty array is returned.
+	 * 
+	 * @return the invariants as a possibly empty array of String.
+	 */
+	private String[] getInvariants() {
+		TableItem[] items = viewer.getTable().getItems();
+		String[] invariants = new String[items.length];
+		for (int i = 0; i < items.length; i++)
+			invariants[i] = items[i].getText();
+		
+		return invariants;
+		
+	}
+	
+	public String asText() {
+		String text = "";
+		String[] invs = getInvariants();
+		for (int i = 0; i < invs.length; i++)
+			text += invs[i] + "\n";
+		return text;
+	}
+	
 }

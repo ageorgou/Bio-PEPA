@@ -6,22 +6,38 @@
  ******************************************************************************/
 package uk.ac.ed.inf.biopepa.ui.views;
 
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import uk.ac.ed.inf.biopepa.core.sba.OutlineAnalyser;
 import uk.ac.ed.inf.biopepa.core.sba.SimpleTree;
 import uk.ac.ed.inf.biopepa.ui.BioPEPAEvent;
+import uk.ac.ed.inf.biopepa.ui.actions.CopyAction;
+import uk.ac.ed.inf.biopepa.ui.actions.SaveAction;
 import uk.ac.ed.inf.biopepa.ui.interfaces.BioPEPAListener;
 import uk.ac.ed.inf.biopepa.ui.interfaces.BioPEPAModel;
+import uk.ac.ed.inf.biopepa.ui.interfaces.ITextProvider;
 
 public class BioPEPAOutline extends ContentOutlinePage implements
-		BioPEPAListener {
+		BioPEPAListener, ITextProvider {
+	
+	Action copyAction;
+	Action saveAction;
 	
 	private Runnable runnable = new Runnable() {
 		public void run() {
@@ -77,10 +93,54 @@ public class BioPEPAOutline extends ContentOutlinePage implements
 		getTreeViewer().setContentProvider(new OutlineContentProvider());
 		getTreeViewer().setLabelProvider(new OutlineLabelProvider());
 		refreshTree();
+		makeActions();
+		hookContextMenu();
+		contributeToActionBars();
 	}
 
+	private void makeActions() {
+		copyAction = new CopyAction(this);
+		copyAction.setText("Copy outline");
+		copyAction.setToolTipText("Copy outline to clipboard");
+		copyAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+			getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+		
+		saveAction = new SaveAction(this);
+		saveAction.setText("Save...");
+		saveAction.setToolTipText("Save outline to file");
+		saveAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+			getImageDescriptor(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+	}
 	
+	private void hookContextMenu() {
+		MenuManager menuMgr = new MenuManager("#PopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				BioPEPAOutline.this.fillContextMenu(manager);
+			}
+		});
+		TreeViewer tv = getTreeViewer();
+		Menu menu = menuMgr.createContextMenu(tv.getControl());
+		tv.getControl().setMenu(menu);
+		getSite().registerContextMenu("uk.ac.ed.inf.biopepa.ui.outlineMenu",
+				menuMgr, tv);
+	}
 	
+	private void contributeToActionBars() {
+		IActionBars bars = getSite().getActionBars();
+		fillLocalToolBar(bars.getToolBarManager());
+	}
+	
+	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(copyAction);
+		manager.add(saveAction);
+	}
+	
+	private void fillContextMenu(IMenuManager manager) {
+		manager.add(copyAction);
+		manager.add(saveAction);
+	}
 	
 	private void refreshTree() {
 		OutlineAnalyser outlineanalyser = new OutlineAnalyser();
@@ -107,4 +167,14 @@ public class BioPEPAOutline extends ContentOutlinePage implements
 		
 		Display.getDefault().asyncExec(runnable);
 	}
+	
+	public String asText() {
+		StringBuilder sb = new StringBuilder();
+		for (SimpleTree t : bt) {
+			sb.append(t.printTree());
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+	
 }
