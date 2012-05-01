@@ -8,6 +8,13 @@ import org.eclipse.swt.widgets.Display;
 
 import uk.ac.ed.inf.biopepa.ui.interfaces.ITextProvider;
 
+/**
+ * An action to copy the contents of e.g. a view to the clipboard.
+ * The text must come from an ITextProvider.
+ * 
+ * @author ageorgou
+ */
+
 public class CopyAction extends Action {
 	
 	ITextProvider source;
@@ -16,7 +23,7 @@ public class CopyAction extends Action {
 		super();
 		this.source = source;
 	}
-	//experimental2
+	
 	public void run() {			
 		TextTransfer transfer = TextTransfer.getInstance();
 		Clipboard cb = new Clipboard(Display.getCurrent());

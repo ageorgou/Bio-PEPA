@@ -6,38 +6,29 @@
  ******************************************************************************/
 package uk.ac.ed.inf.biopepa.ui.views;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import uk.ac.ed.inf.biopepa.core.sba.OutlineAnalyser;
 import uk.ac.ed.inf.biopepa.core.sba.SimpleTree;
 import uk.ac.ed.inf.biopepa.ui.BioPEPAEvent;
+import uk.ac.ed.inf.biopepa.ui.actions.CopyAction;
+import uk.ac.ed.inf.biopepa.ui.actions.SaveAction;
 import uk.ac.ed.inf.biopepa.ui.interfaces.BioPEPAListener;
 import uk.ac.ed.inf.biopepa.ui.interfaces.BioPEPAModel;
 import uk.ac.ed.inf.biopepa.ui.interfaces.ITextProvider;
@@ -104,17 +95,17 @@ public class BioPEPAOutline extends ContentOutlinePage implements
 		refreshTree();
 		makeActions();
 		hookContextMenu();
-		//add for toolbar/menu items, if desired
+		contributeToActionBars();
 	}
 
 	private void makeActions() {
-		copyAction = new CopyInvariantsAction();
-		copyAction.setText("Copy all");
+		copyAction = new CopyAction(this);
+		copyAction.setText("Copy outline");
 		copyAction.setToolTipText("Copy outline to clipboard");
 		copyAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 			getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		
-		saveAction = new SaveInvariantsAction();
+		saveAction = new SaveAction(this);
 		saveAction.setText("Save...");
 		saveAction.setToolTipText("Save outline to file");
 		saveAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
@@ -136,14 +127,19 @@ public class BioPEPAOutline extends ContentOutlinePage implements
 				menuMgr, tv);
 	}
 	
+	private void contributeToActionBars() {
+		IActionBars bars = getSite().getActionBars();
+		fillLocalToolBar(bars.getToolBarManager());
+	}
+	
+	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(copyAction);
+		manager.add(saveAction);
+	}
+	
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(copyAction);
 		manager.add(saveAction);
-		/*
-		manager.add(copyAction);
-		manager.add(saveAction);
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-		*/
 	}
 	
 	private void refreshTree() {
@@ -180,53 +176,5 @@ public class BioPEPAOutline extends ContentOutlinePage implements
 		}
 		return sb.toString();
 	}
-
-	private class CopyInvariantsAction extends Action {
-		public void run() {			
-			TextTransfer transfer = TextTransfer.getInstance();
-			Clipboard cb = new Clipboard(Display.getCurrent());
-			cb.setContents(new String[] {asText()}, new Transfer[] {transfer});
-			cb.dispose();
-
-		}
-	}
-
-	private class SaveInvariantsAction extends Action {
-
-		public void run() {
-			String text = asText();
-
-			if (text == null || text.isEmpty())
-				MessageDialog.openError(Display.getCurrent().getActiveShell(),
-						"Outline", "No outline found.");
-
-			else try {
-				//get the location of the file in the editor
-				IResource modelFile = (IResource) PlatformUI.getWorkbench().getActiveWorkbenchWindow(). 
-				getActivePage().getActiveEditor().getEditorInput().getAdapter(IResource.class);
-				String modelPath = modelFile.getLocation().removeLastSegments(1).toString();
-
-				FileDialog fd =
-					new FileDialog(Display.getDefault().getActiveShell(),SWT.SAVE) ;
-				fd.setOverwrite(true);
-				fd.setFilterPath(modelPath);
-				String targetFile = fd.open();
-
-				//write the invariants in the target file
-				if (targetFile != null) {
-					Writer w = new BufferedWriter(new FileWriter(new File(targetFile)));
-					w.write(asText());
-					w.close();
-				}
-
-
-			}
-			catch (Exception e){
-				e.printStackTrace();
-				MessageDialog.openError(Display.getCurrent().getActiveShell(),
-						"Outline", "Error while saving outline.");
-			}
-		}
-
-	}
+	
 }
