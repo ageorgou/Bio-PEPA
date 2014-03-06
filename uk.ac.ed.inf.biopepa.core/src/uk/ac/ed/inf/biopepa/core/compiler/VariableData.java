@@ -17,6 +17,7 @@ import uk.ac.ed.inf.biopepa.core.dom.ASTNode;
 public class VariableData extends Data {
 
 	private CompiledExpression value;
+	private boolean uncertain;
 
 	public VariableData(String name, ASTNode declaration) {
 		super(name, declaration);
@@ -30,8 +31,16 @@ public class VariableData extends Data {
 		this.value = expression;
 	}
 
+	void setUncertain(boolean uncertain) {
+		this.uncertain = uncertain;
+	}
+	
 	public boolean isDynamic() {
 		return value.isDynamic();
+	}
+	
+	public boolean isUncertain() {
+		return uncertain;
 	}
 
 }

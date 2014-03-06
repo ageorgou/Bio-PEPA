@@ -23,7 +23,10 @@ public class VariableCompiler extends AbstractDefinitionCompiler {
 		VariableData result = new VariableData(name, dec);
 		ExpressionEvaluatorVisitor v = new ExpressionEvaluatorVisitor(compiler);
 		dec.getRightHandSide().accept(v);
-		result.setValue(v.getExpressionNode());
+		CompiledExpression e = v.getExpressionNode();
+		result.setValue(e);
+		if (e instanceof CompiledDistribution)
+			result.setUncertain(true);
 		return result;
 	}
 

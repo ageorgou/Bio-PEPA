@@ -25,7 +25,9 @@ public class AST {
 				"compartment"), MEMBRANE("membrane"),
 		// Following are functions not required in the jflex file
 		LOGARITHM("log"), EXP("exp"), HEAVISIDE("H"), MASS_ACTION("fMA"), MICHAELIS_MENTEN("fMM"), COMPETITIVE_INHIBITION(
-				"fCI"), FLOOR("floor"), CEILING("ceil"), TANH("tanh"), TIME("time");
+				"fCI"), FLOOR("floor"), CEILING("ceil"), TANH("tanh"), TIME("time"),
+		// New literals to represent distributions
+		UNIFORM("Uniform"), GAUSSIAN("Gaussian"), EXPONENTIAL("Exponential");
 
 		private String token;
 

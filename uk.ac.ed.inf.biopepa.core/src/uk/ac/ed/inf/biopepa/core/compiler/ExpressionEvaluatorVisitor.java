@@ -7,6 +7,7 @@
 package uk.ac.ed.inf.biopepa.core.compiler;
 
 import uk.ac.ed.inf.biopepa.core.BioPEPAException;
+import uk.ac.ed.inf.biopepa.core.compiler.CompiledDistribution.Distribution;
 import uk.ac.ed.inf.biopepa.core.compiler.CompiledFunction.Function;
 import uk.ac.ed.inf.biopepa.core.compiler.ProblemInfo.Severity;
 import uk.ac.ed.inf.biopepa.core.dom.*;
@@ -180,38 +181,57 @@ public class ExpressionEvaluatorVisitor extends DefaultCompilerVisitor {
 
 	@Override
 	public boolean visit(FunctionCall functionCall) throws BioPEPAException {
-		// The code contained within the 'if' statement here was added by
-		// me (allan) in order to potentially allow rate functions with
-		// predefined rate laws contained within an expression, ie. that are
-		// not at the top-level. We were certainly handling these incorrectly
-		// we should at least add a problem saying  you're not allowed to
-		// have these at the non-top level. So for example if you write
-		// r = [ 1 + fMA(a) ]
-		// Then before this code was added you would silently get an error
-		// when the function was attempted to be evaluated. Now you at least
-		// do not get that error, however I'm not sure that all is well,
-		// what happens if you write D[fMA(r)] in the system equation?
-		Function f = CompiledFunction.checkFunction(compiler, functionCall);
-		if (f.isRateLaw()) {
-			// Hmm, not sure about this, basically I'm worried that if I
-			// write r = [ 1 + fMA(a) ]
-			// then I'll get a warning that the reaction rate does not depend
-			// on its Reactants.
-			// predefinedLaw = true;
-			CompiledFunction efn = new CompiledFunction();
-			efn.setFunction(f);
+		//First try to see if the FunctionCall refers to a function - if not,
+		//then try a distribution:
+
+		try {
+			// The code contained within the 'if' statement here was added by
+			// me (allan) in order to potentially allow rate functions with
+			// predefined rate laws contained within an expression, ie. that are
+			// not at the top-level. We were certainly handling these incorrectly
+			// we should at least add a problem saying  you're not allowed to
+			// have these at the non-top level. So for example if you write
+			// r = [ 1 + fMA(a) ]
+			// Then before this code was added you would silently get an error
+			// when the function was attempted to be evaluated. Now you at least
+			// do not get that error, however I'm not sure that all is well,
+			// what happens if you write D[fMA(r)] in the system equation?
+			Function f = CompiledFunction.checkFunction(compiler, functionCall);
+			if (f.isRateLaw()) {
+				// Hmm, not sure about this, basically I'm worried that if I
+				// write r = [ 1 + fMA(a) ]
+				// then I'll get a warning that the reaction rate does not depend
+				// on its Reactants.
+				// predefinedLaw = true;
+				CompiledFunction efn = new CompiledFunction();
+				efn.setFunction(f);
+				int i = 0;
+				ExpressionEvaluatorVisitor eev;
+				for (Expression e : functionCall.arguments()) {
+					eev = new ExpressionEvaluatorVisitor(compiler);
+					e.accept(eev);
+					efn.setArgument(i++, eev.getExpressionNode());
+					node = efn;
+				}
+				return true;
+			}
+		}
+		catch (CompilerException ce) {
+			//If here, the function wasn't recognised, so check if it is a distribution
+			Distribution d = CompiledDistribution.checkDistribution(compiler, functionCall);
+			CompiledDistribution cd = new CompiledDistribution();
+			cd.setDistribution(d);
 			int i = 0;
 			ExpressionEvaluatorVisitor eev;
 			for (Expression e : functionCall.arguments()) {
 				eev = new ExpressionEvaluatorVisitor(compiler);
 				e.accept(eev);
-				efn.setArgument(i++, eev.getExpressionNode());
-				node = efn;
+				cd.setArgument(i++, eev.getExpressionNode());
+				node = cd;
 			}
 			return true;
 		}
-		
-		
+		// in case of non-rate functions:
 		IPredefinedFunctionEvaluator evaluator;
 		evaluator = CompiledFunction.getFunctionEvaluator(compiler, functionCall);
 		try {
@@ -220,6 +240,7 @@ public class ExpressionEvaluatorVisitor extends DefaultCompilerVisitor {
 			// Already handled by the code throwing the EvaluationException
 		}
 		return true;
+
 	}
 
 	@Override

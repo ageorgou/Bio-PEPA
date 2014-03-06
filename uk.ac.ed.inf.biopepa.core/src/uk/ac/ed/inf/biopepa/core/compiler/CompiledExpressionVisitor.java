@@ -19,4 +19,6 @@ public abstract class CompiledExpressionVisitor {
 
 	public abstract boolean visit(CompiledSystemVariable variable);
 
+	public boolean visit(CompiledDistribution distribution) { return false; }
+	
 }
