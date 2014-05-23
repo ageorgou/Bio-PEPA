@@ -38,6 +38,7 @@ public class ComponentCompiler extends AbstractDefinitionCompiler {
 		String identifier = name.getIdentifier();
 		ComponentPrefixVisitor v = new ComponentPrefixVisitor(compiler, identifier);
 		ComponentData d = new ComponentData(identifier, dec);
+		
 		dec.getRightHandSide().accept(v);
 		d.setPrefixes(v.getActions());
 		return d;

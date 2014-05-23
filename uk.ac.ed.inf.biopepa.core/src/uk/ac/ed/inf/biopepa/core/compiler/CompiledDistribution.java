@@ -4,8 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
+import uk.ac.ed.inf.biopepa.core.BioPEPAException;
 import uk.ac.ed.inf.biopepa.core.dom.AST;
+import uk.ac.ed.inf.biopepa.core.dom.Expression;
 import uk.ac.ed.inf.biopepa.core.dom.FunctionCall;
+import uk.ac.ed.inf.biopepa.uncertain.AbstractDistribution;
+import uk.ac.ed.inf.biopepa.uncertain.Exponential;
+import uk.ac.ed.inf.biopepa.uncertain.Gaussian;
+import uk.ac.ed.inf.biopepa.uncertain.Uniform;
 
 public class CompiledDistribution extends CompiledExpression {
 
@@ -91,6 +98,33 @@ public class CompiledDistribution extends CompiledExpression {
 		return d;
 	}
 	
+	public static AbstractDistribution getImplementation(FunctionCall call, ModelCompiler mc)
+			throws BioPEPAException {
+		
+		Distribution d = checkDistribution(mc, call);
+		
+		//calculate the value of the parameters of the distribution		
+		List<Double> distArgs = new ArrayList<Double>();
+		for (Expression e : call.arguments()) {
+			ExpressionEvaluatorVisitor v  = new ExpressionEvaluatorVisitor(mc);
+			e.accept(v);
+			if (! (v.node instanceof CompiledNumber))
+				throw new CompilerException("Could not retrieve arguments of distribution");
+			distArgs.add(((CompiledNumber) v.node).getNumber().doubleValue());
+		}
+		
+		switch(d) {
+		case UNIFORM :	return new Uniform(distArgs.get(0),distArgs.get(1));
+		
+		case GAUSSIAN : return new Gaussian(distArgs.get(0),distArgs.get(1));
+		
+		case EXPONENTIAL : return new Exponential(distArgs.get(0));
+		
+		default : throw new CompilerException("No such distribution");
+		}
+		
+		
+	}
 		
 
 	@Override
