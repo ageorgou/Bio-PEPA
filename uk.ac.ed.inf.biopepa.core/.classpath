@@ -8,7 +8,6 @@
 	<classpathentry exported="true" kind="lib" path="runtime/java-cup-11a-runtime.jar" sourcepath="/Users/Mirco/src/javacup/src"/>
 	<classpathentry kind="lib" path="libraries/systemsbiology.jar"/>
 	<classpathentry kind="lib" path="libraries/jsbml-0.8-b1-with-dependencies.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/uk.ac.ed.inf.biopepa.uncertain"/>
 	<classpathentry exported="true" kind="lib" path="numericalMethods.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
