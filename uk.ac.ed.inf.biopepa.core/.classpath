@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="libraries/systemsbiology.jar"/>
 	<classpathentry kind="lib" path="libraries/jsbml-0.8-b1-with-dependencies.jar"/>
 	<classpathentry exported="true" kind="lib" path="numericalMethods.jar"/>
+	<classpathentry kind="lib" path="/afs/inf.ed.ac.uk/user/s10/s1050238/git/Bio-PEPA/uk.ac.ed.inf.biopepa.core/libraries/commons-math3-3.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

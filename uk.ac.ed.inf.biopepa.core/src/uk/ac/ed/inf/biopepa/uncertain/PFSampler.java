@@ -30,7 +30,8 @@ public class PFSampler {
 
 	private Result observation; // the observed time-series
 	// samples must be a list (at least not a set), as there may be duplicates
-	private List<List<Particle>> samples;
+	//private List<List<Particle>> samples;
+	private List<Particle> particles;
 	int dim; // number of model parameters to learn
 	String[] names; // names of the parameters (to access priors/proposals)
 	private PFParameters params; // algorithm parameters
@@ -40,14 +41,15 @@ public class PFSampler {
 	private Parameters solverParams;
 	private ProgressMonitor monitor;
 	private String[] components;
-	private static Random random;
+	private Random random;
 	
 	public PFSampler(Result observation, PFParameters params) {
 		
 		this.observation = observation;
 		setParams(params);
-		this.samples = new ArrayList<List<Particle>>();
-		//this.random = new Random();
+		//this.samples = new ArrayList<List<Particle>>();
+		this.particles = new ArrayList<Particle>();
+		this.random = new Random();
 		// we need a monitor for calling the simulation engine, so just use...
 		this.monitor = new ProgressMonitor() { // a monitor that does nothing
 			public void beginTask(int amount) {	}
@@ -66,9 +68,9 @@ public class PFSampler {
 	
 	public List<double[]> getSamples() {
 		// return the last in the sequence of approximations
-		List<Particle> lastParticles = samples.get(samples.size() - 1);
+		//List<Particle> lastParticles = samples.get(samples.size() - 1);
 		List<double[]> paramSamples = new ArrayList<double[]>();
-		for (Particle p : lastParticles)
+		for (Particle p : particles)
 			paramSamples.add(p.parameters);
 		return paramSamples;		
 	}
@@ -98,26 +100,30 @@ public class PFSampler {
 		
 		
 		//create initial set of particles
-		List<Particle> particles = new ArrayList<Particle>();
+		particles = new ArrayList<Particle>();
 		//all initial particles start from the first observation point (at t=0)
-		double[] initState = observation.getTimeSeries(0);
+		double[] initState = new double[components.length];
+		for (int k = 0; k < components.length; k++)
+			initState[k] = observation.getTimeSeries(k)[0];
 		for (int i = 0; i < params.getN(); i++) {
 			// sample from prior for parameters
 			double[] paramSample = new double[dim];
 			for (int j = 0; j < dim; j++)
 				paramSample[j] = params.getPriors().get(names[j]).sample();
 			particles.add(new Particle(paramSample, initState.clone()));
-			samples.add(particles);
+			//samples.add(particles);
 		}
 		
 		try {
 			double currTime = observation.getTimePoints()[0];
 			for (int n = 1; n < observation.getTimePoints().length; n++) {
 				double nextTime = observation.getTimePoints()[n];
-				double[] target = observation.getTimeSeries(n);
-				List<Particle> newSamples = particleFilter(particles,currTime,nextTime,target);
-				samples.add(newSamples);
-				particles = newSamples;
+				double[] target = new double[components.length];
+				for (int k = 0; k < components.length; k++)
+					target[k] = observation.getTimeSeries(k)[n];
+				//List<Particle> newSamples = particleFilter(particles,currTime,nextTime,target);
+				//samples.add(newSamples);
+				particles = particleFilter(particles,currTime,nextTime,target);
 				currTime = nextTime;
 			}
 		} catch (BioPEPAException e) {
@@ -186,7 +192,10 @@ public class PFSampler {
 		
 		// record the new state...
 		// TODO is this the actual final state, or should we check?
-		double[] state = r.getTimeSeries(r.getTimePoints().length-1);
+		double[] state = new double[components.length];
+		int lastIndex = r.getTimePoints().length-1;
+		for (int i = 0; i < components.length; i++)
+			state[i] = r.getTimeSeries(i)[lastIndex];
 		p.setState(state);
 	}
 	
