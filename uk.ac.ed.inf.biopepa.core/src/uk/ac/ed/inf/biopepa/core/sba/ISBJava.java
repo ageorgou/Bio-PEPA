@@ -29,6 +29,7 @@ import org.systemsbiology.chem.SimulatorStochasticGillespie;
 import org.systemsbiology.chem.SimulatorStochasticTauLeapBase;
 import org.systemsbiology.chem.SimulatorStochasticTauLeapComplex;
 import org.systemsbiology.chem.Species;
+import org.systemsbiology.chem.SymbolEvaluatorChem;
 import org.systemsbiology.chem.odetojava.SimulatorOdeToJavaBase;
 import org.systemsbiology.chem.odetojava.SimulatorOdeToJavaRungeKuttaAdaptive;
 import org.systemsbiology.chem.odetojava.SimulatorOdeToJavaRungeKuttaImplicit;
@@ -37,6 +38,8 @@ import org.systemsbiology.math.Expression.Element;
 import org.systemsbiology.math.Expression.ElementCode;
 import org.systemsbiology.math.Symbol;
 import org.systemsbiology.math.Value;
+import org.systemsbiology.util.DataNotFoundException;
+import org.systemsbiology.util.InvalidInputException;
 
 import uk.ac.ed.inf.biopepa.core.BasicResult;
 import uk.ac.ed.inf.biopepa.core.BioPEPAException;
@@ -303,6 +306,73 @@ public class ISBJava {
 		}
 	}
 
+		static class TauLeapSimple implements Solver {
+
+		public String getDescriptiveName() {
+			return "Gillespie's Tau-Leap Stochastic Algorithm (simplest version)";
+		}
+
+		public Parameters getRequiredParameters() {
+			Parameters p = stochasticParameters();
+			p.add(Parameter.Step_Size);
+			p.add(Parameter.Relative_Error);
+			return p;
+		}
+
+		public String getShortName() {
+			return "tau-leap-simple";
+		}
+
+		public Result startTimeSeriesAnalysis(SBAModel model, Parameters parameters,
+				ProgressMonitor monitor) throws BioPEPAException {
+			final double stepSize = (Double) parameters.getValue(Parameter.Step_Size);
+			ISBJava isbjava = new ISBJava(model, (String[]) parameters.getValue(Parameter.Components));
+			isbjava.simulator = new SimulatorStochasticTauLeapBase() {
+				@Override
+				protected double computeLeapTime(double arg0) throws DataNotFoundException {
+					return stepSize;
+				}
+
+				@Override
+				protected void initializeTauLeap(SymbolEvaluatorChem arg0)
+						throws DataNotFoundException, InvalidInputException {
+					// no init needed
+				}
+				
+			};
+			isbjava.simulatorParameters = ((SimulatorStochasticTauLeapBase) isbjava.simulator)
+					.getDefaultSimulatorParameters();
+			isbjava.mapModel();
+			try {
+				((SimulatorStochasticTauLeapBase) isbjava.simulator).initialize(isbjava.model);
+			} catch (Exception e) {
+				throw new BioPEPAException(e);
+			}
+			
+			SimulationResults results = isbjava.run(getRequiredParameters(), parameters, monitor);
+			if (monitor.isCanceled())
+				return null;
+			Results ourResults = new Results(results, false, parameters, isbjava.parameterMap, getDescriptiveName());
+			return ourResults;
+		}
+
+		public SolverResponse getResponse(final SBAModel model) {
+			return new SolverResponse() {
+				public String getMessage() {
+					if (model.timeDependentRates)
+						return "This algorithm cannot simulate models dependent on time.";
+					return null;
+				}
+
+				public Suitability getSuitability() {
+					if (model.timeDependentRates)
+						return Suitability.UNSUITABLE;
+					return Suitability.PERMISSIBLE;
+				}
+			};
+		}
+	}
+	
 	public class RatesVisitor extends CompiledExpressionVisitor {
 
 		Element element;

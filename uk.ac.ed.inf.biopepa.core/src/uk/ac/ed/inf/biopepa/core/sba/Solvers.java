@@ -27,6 +27,9 @@ public class Solvers {
 		add(solver.getClass(), solver.getShortName(), solver.getDescriptiveName());
 		solver = new ISBJava.IMEX();
 		add(solver.getClass(), solver.getShortName(), solver.getDescriptiveName());
+		// The new simplistic tau-leaping solver
+		solver = new ISBJava.TauLeapSimple();
+		add(solver.getClass(), solver.getShortName(), solver.getDescriptiveName());
 		// My new native ODE solver
 		solver = new NativeRungaKutta();
 		add(solver.getClass(), solver.getShortName(), solver.getDescriptiveName());
