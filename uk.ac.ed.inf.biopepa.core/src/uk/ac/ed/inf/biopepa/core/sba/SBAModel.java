@@ -125,8 +125,10 @@ public class SBAModel implements DynamicExpressionModelContext {
 				} else {
 					throw new IllegalArgumentException("Unrecognised subclass of PrefixData.");
 				}
-				reaction.addComponent(behaviour);
-				recordReaction(reaction);
+				// Reaction is already added in either case, so this is superfluous
+				// (and causes errors in simulation); hence, commented out.
+				//reaction.addComponent(behaviour);
+				//recordReaction(reaction);
 			}
 		}
 
