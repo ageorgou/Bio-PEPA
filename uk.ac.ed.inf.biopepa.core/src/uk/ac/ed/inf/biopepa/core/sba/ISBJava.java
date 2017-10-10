@@ -558,8 +558,9 @@ public class ISBJava {
 		}
 
 		public Value getValue() {
-			if (element.mCode.equals(ElementCode.NUMBER))
-				return new Value(element.mNumericValue);
+			// comment to see if simple numbers are interpreted as numbers rather than MA constants
+			//if (element.mCode.equals(ElementCode.NUMBER))
+			//	return new Value(element.mNumericValue);
 			return new Value(new Expression(element));
 		}
 
